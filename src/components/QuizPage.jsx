@@ -1,60 +1,152 @@
-import React, { useState } from "react";
-import Result from "./Result";
+import React, { useEffect, useState } from "react";
+import { getRoles, getQuestionsByRole } from "../api/api";
+import QuizPage from "./QuizPage";
 
-export default function QuizPage({ questions }) {
-  const [current, setCurrent] = useState(0);
-  const [score, setScore] = useState(0);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [showResult, setShowResult] = useState(false);
+export default function CustomerPage() {
+  const [roles, setRoles] = useState([]);
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [questions, setQuestions] = useState([]);
 
-  const handleSelect = (idx) => setSelectedOption(idx);
+  // Fetch all roles
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await getRoles();
+        setRoles(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchRoles();
+  }, []);
 
-  const handleNext = () => {
-    if (selectedOption === questions[current].answerIndex) setScore(score + 1);
-    setSelectedOption(null);
-    if (current + 1 < questions.length) setCurrent(current + 1);
-    else setShowResult(true);
+  // Fetch questions when a role is selected
+  const handleRoleSelect = async (roleId) => {
+    setSelectedRole(roleId);
+    try {
+      const res = await getQuestionsByRole(roleId);
+      setQuestions(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  if (!questions.length) return <div>Loading...</div>;
-
-  if (showResult) {
-    const roleName = questions[0]?.role?.name || "Unknown Role";
-    return <Result score={score} total={questions.length} roleName={roleName} />;
+  if (selectedRole) {
+    return <QuizPage questions={questions} />;
   }
 
-  const currentQuestion = questions[current];
+  // Inline styles inspired by your CSS theme
+  const styles = {
+    container: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "50px 20px",
+      minHeight: "80vh",
+      textAlign: "center",
+      background: "linear-gradient(135deg, #E6F4EA 0%, #d4f1e3 100%)",
+      borderRadius: "16px",
+    },
+    header: {
+      fontSize: "2rem",
+      fontWeight: "700",
+      color: "#0B3D2E",
+      marginBottom: "25px",
+    },
+    card: {
+      background: "#ffffff",
+      padding: "30px",
+      borderRadius: "16px",
+      width: "90%",
+      maxWidth: "700px",
+      boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+      position: "relative",
+      overflow: "hidden",
+      animation: "fadeIn 0.5s ease-out",
+    },
+    cardTopBar: {
+      content: '""',
+      position: "absolute",
+      top: "0",
+      left: "0",
+      width: "100%",
+      height: "5px",
+      background: "linear-gradient(90deg, #2E8B57, #0B3D2E)",
+    },
+    select: {
+      padding: "12px 16px",
+      borderRadius: "10px",
+      border: "2px solid #e0e0e0",
+      width: "100%",
+      maxWidth: "400px",
+      fontSize: "1rem",
+      cursor: "pointer",
+      marginTop: "20px",
+    },
+    infoText: {
+      color: "#1a7f5c",
+      fontSize: "1.1rem",
+      marginBottom: "20px",
+      fontWeight: "500",
+      lineHeight: "1.6",
+    },
+    btn: {
+      marginTop: "30px",
+      padding: "12px 30px",
+      background:
+        "linear-gradient(135deg, #2E8B57 0%, #1a7f5c 100%)",
+      color: "white",
+      border: "none",
+      borderRadius: "10px",
+      cursor: "pointer",
+      fontWeight: "600",
+      fontSize: "1rem",
+      boxShadow: "0 6px 15px rgba(0,0,0,0.08)",
+      transition: "all 0.3s ease",
+    },
+  };
 
   return (
-    <div className="container quiz-section">
-      <div className="card">
-        <h3>Question {current + 1}</h3>
-        <pre
-          style={{
-            whiteSpace: "pre-wrap",
-            wordWrap: "break-word",
-            backgroundColor: "#f8f8f8",
-            padding: "10px",
-            borderRadius: "8px",
-            fontFamily: "monospace",
-            fontSize: "14px",
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <div style={styles.cardTopBar}></div>
+        <h2 style={styles.header}>Select Your Role</h2>
+        <p style={styles.infoText}>
+          Welcome to the <strong>Reva AI Skill Assessment</strong> platform.<br />
+          Choose your desired role to begin the quiz and test your skills in real-world scenarios.
+        </p>
+
+        <select
+          onChange={(e) => handleRoleSelect(e.target.value)}
+          defaultValue=""
+          style={styles.select}
+        >
+          <option value="" disabled>
+            Select Role
+          </option>
+          {roles.map((r) => (
+            <option key={r._id} value={r._id}>
+              {r.name}
+            </option>
+          ))}
+        </select>
+
+        <button
+          style={styles.btn}
+          onClick={() => window.location.href = "https://reva-ai-skill-assessment.onrender.com"}
+          onMouseOver={(e) => {
+            e.target.style.background =
+              "linear-gradient(135deg, #1C5D3D 0%, #0B3D2E 100%)";
+            e.target.style.transform = "translateY(-3px)";
+          }}
+          onMouseOut={(e) => {
+            e.target.style.background =
+              "linear-gradient(135deg, #2E8B57 0%, #1a7f5c 100%)";
+            e.target.style.transform = "translateY(0)";
           }}
         >
-          {currentQuestion.question}
-        </pre>
-
-        {currentQuestion.options.map((opt, idx) => (
-          <div
-            key={idx}
-            className={`option ${selectedOption === idx ? "selected" : ""}`}
-            onClick={() => handleSelect(idx)}
-          >
-            {opt}
-          </div>
-        ))}
-
-        <button onClick={handleNext} disabled={selectedOption === null}>
-          {current + 1 === questions.length ? "Finish" : "Next"}
+          🔄 Back to Home
         </button>
       </div>
     </div>
