@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Result({ score, total, roleName }) {
+  const navigate = useNavigate();
   const percentage = ((score / total) * 100).toFixed(0);
   const currentRole = roleName || "Unknown Role";
 
@@ -67,16 +69,20 @@ export default function Result({ score, total, roleName }) {
     },
   };
 
+  // 🎯 Feedback logic
   const getFeedback = () => {
-    if (percentage >= 90) return { title: "🏆 Outstanding!", message: "You’ve mastered this topic!" };
-    if (percentage >= 75) return { title: "💪 Great Job!", message: "Keep improving and explore advanced topics next." };
-    if (percentage >= 50) return { title: "📘 Keep Improving!", message: "You’re getting there! Focus on intermediate areas." };
+    if (percentage >= 90)
+      return { title: "🏆 Outstanding!", message: "You’ve mastered this topic!" };
+    if (percentage >= 75)
+      return { title: "💪 Great Job!", message: "Keep improving and explore advanced topics next." };
+    if (percentage >= 50)
+      return { title: "📘 Keep Improving!", message: "You’re getting there! Focus on intermediate areas." };
     return { title: "📚 Don’t Give Up!", message: "Start with the basics and build your confidence." };
   };
 
   const feedback = getFeedback();
 
-  // 🎯 Select the correct difficulty level
+  // 🎯 Difficulty level selection
   let difficulty = "beginner";
   if (percentage >= 80) difficulty = "advanced";
   else if (percentage >= 50) difficulty = "intermediate";
@@ -85,54 +91,82 @@ export default function Result({ score, total, roleName }) {
   const recommended = roleData ? roleData[difficulty] : [];
 
   return (
-    <div style={{
-      maxWidth: "650px",
-      margin: "50px auto",
-      padding: "35px",
-      backgroundColor: "#f8fafc",
-      borderRadius: "14px",
-      boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-      textAlign: "center",
-      fontFamily: "Poppins, sans-serif",
-    }}>
+    <div
+      style={{
+        maxWidth: "650px",
+        margin: "50px auto",
+        padding: "35px",
+        backgroundColor: "#f8fafc",
+        borderRadius: "14px",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+        textAlign: "center",
+        fontFamily: "Poppins, sans-serif",
+      }}
+    >
       <h2>🎉 Quiz Completed!</h2>
-      <p>Score: <strong>{score}/{total}</strong></p>
-      <p>Percentage: <strong>{percentage}%</strong></p>
-      <p>Role: <strong>{currentRole}</strong></p>
-
-      <p style={{
-        fontWeight: "600",
-        color: percentage >= 80 ? "green" : percentage >= 50 ? "orange" : "red",
-      }}>
-        {percentage >= 80 ? "Excellent 🎯" : percentage >= 50 ? "Good Effort 👍" : "Needs Improvement 😕"}
+      <p>
+        Score: <strong>{score}/{total}</strong>
+      </p>
+      <p>
+        Percentage: <strong>{percentage}%</strong>
+      </p>
+      <p>
+        Role: <strong>{currentRole}</strong>
       </p>
 
-      <div style={{
-        marginTop: "20px",
-        padding: "15px",
-        backgroundColor: "#fff",
-        borderRadius: "10px",
-        border: "1px solid #ddd",
-        textAlign: "left",
-      }}>
-        <h4>{feedback.title}</h4>
-        <p>{feedback.message}</p>
-      </div>
+      <p
+        style={{
+          fontWeight: "600",
+          color:
+            percentage >= 80 ? "green" : percentage >= 50 ? "orange" : "red",
+        }}
+      >
+        {percentage >= 80
+          ? "Excellent 🎯"
+          : percentage >= 50
+          ? "Good Effort 👍"
+          : "Needs Improvement 😕"}
+      </p>
 
-      {recommended.length > 0 && (
-        <div style={{
-          marginTop: "25px",
+      <div
+        style={{
+          marginTop: "20px",
           padding: "15px",
           backgroundColor: "#fff",
           borderRadius: "10px",
           border: "1px solid #ddd",
           textAlign: "left",
-        }}>
-          <h4>🎓 Recommended {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Courses for {currentRole}</h4>
+        }}
+      >
+        <h4>{feedback.title}</h4>
+        <p>{feedback.message}</p>
+      </div>
+
+      {recommended.length > 0 && (
+        <div
+          style={{
+            marginTop: "25px",
+            padding: "15px",
+            backgroundColor: "#fff",
+            borderRadius: "10px",
+            border: "1px solid #ddd",
+            textAlign: "left",
+          }}
+        >
+          <h4>
+            🎓 Recommended{" "}
+            {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Courses
+            for {currentRole}
+          </h4>
           <ul>
             {recommended.map((c, idx) => (
               <li key={idx} style={{ marginBottom: "8px" }}>
-                <a href={c.link} target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb" }}>
+                <a
+                  href={c.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#2563eb" }}
+                >
                   {c.name}
                 </a>
               </li>
@@ -142,7 +176,7 @@ export default function Result({ score, total, roleName }) {
       )}
 
       <button
-        onClick={() => window.location.reload()}
+        onClick={() => navigate("/")}
         style={{
           marginTop: "25px",
           padding: "10px 20px",
@@ -154,7 +188,7 @@ export default function Result({ score, total, roleName }) {
           fontWeight: "500",
         }}
       >
-        🔄 Try Again
+        🏠 Go to Home
       </button>
     </div>
   );
